@@ -22,13 +22,21 @@ class Request {
   }
 
   Future<Response> getFileResponseForUrl(String url) async {
+    Map<String, String> headers = {
+      "User-Agent": globalState.appController.clashConfig.globalUa,
+    };
+    Uri uri = Uri.parse(url);
+    if (uri.userInfo.isNotEmpty) {
+      headers['Authorization'] = 'Basic ' + base64Encode(utf8.encode(uri.userInfo));
+      uri = uri.replace(userInfo: '');
+      url = uri.toString();
+    }
+
     final response = await _dio
         .get(
           url,
           options: Options(
-            headers: {
-              "User-Agent": globalState.appController.clashConfig.globalUa
-            },
+            headers: headers,
             responseType: ResponseType.bytes,
           ),
         )
